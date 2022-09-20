@@ -39,13 +39,5 @@ if settings.DEBUG:
 
 urlpatterns += [
     path('', AnnouncementList.as_view(), name='main_page'),
-    path('post/<int:pk>', AnnouncementDetail.as_view(), name='view_post'),
-    path('post/<int:pk>/edit', AnnouncementUpdate.as_view(), name='edit_post'),
-    path('post/<int:pk>/del', AnnouncementDelete.as_view(), name='del_post'),
-    path('post/<int:pk>/add', AnnouncementCreate.as_view(), name='add_post'),
-
-    path('recall/<int:post>', RecallList.as_view(), name='list_recall'),
-    path('recall/<int:pk>/edit', RecallUpdate.as_view(), name='edit_recall'),
-    path('recall/<int:pk>/del', RecallDelete.as_view(), name='del_recall'),
-    path('recall/<int:pk>/add', RecallCreate.as_view(), name='add_post'),
+    path('post/<int:pk>/<str:action>', announcement_detail, name='detail_post'),
 ]

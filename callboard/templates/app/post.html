@@ -2,4 +2,107 @@
 {% load static %}
 
 {% block content %}
+
+
+<div class="box">
+    <h2 class="title is-3 ">{{ data.title }}</h2> 
+    <article class="media">
+      <figure class="media-left">
+        <p class="image is-64x64">
+          <img src={% static "announcement.png" %}>
+        </p>
+      </figure>
+      <div class="media-content">
+        <div class="content">
+          <div class="box">
+            {% if form  %}
+            <form method="post">
+                <input type='hidden' name='type' value='post'>
+                <input type='hidden' name='pk' value={{data.pk}}>
+                {% csrf_token %}
+                {{ form  }}
+                <div class="field">
+                  <div class="buttons">
+                    <button class="button is-warning is-light">
+                        <span class="icon">
+                          <i class="fas fa-cancel"></i>
+                        </span>
+                        <span>Отмена</span>
+                    </button>
+                    <button class="button is-info">
+                        <span class="icon">
+                          <i class="fas fa-save"></i>
+                        </span>
+                        <span>Сохранить</span>
+                    </button>
+
+                      /post/{pk}/detail
+                  </div>
+                </div>
+            </form>
+            {% else  %}
+              <strong>{{data.user}}</strong>
+              <div class="box">
+              {{ data.content|safe }}
+              </div>
+              <span class="tag is-primary is-light" title='Дата создания'>{{data.date_create}}</span>
+              {% if data.date_update %}<span class="tag is-link is-light" title='Дата изменения'>{{data.date_update}}</span> {% endif %}
+            {% endif  %}
+          </div>
+        </div>
+
+        {% for comment in data.recalls.all %}
+        <article class="media">
+          <figure class="media-left">
+            <p class="image is-48x48">
+              <img src={% static "announcement.png" %} >
+            </p>
+          </figure>
+          <div class="media-content">
+            <div class="content box">
+              <p>
+                <strong>{{comment.user}}</strong> 
+                {% if comment.accept %} <span class="tag is-link">Принято</span>{% endif %}
+                <br>
+                {{ comment.content|safe }}
+                <br>
+                <span class="tag is-primary is-light" title='Дата создания'>{{comment.date_create}}</span>
+              </p>
+            </div>
+          </div>
+        </article>
+        
+        {% endfor %}   
+        {% if request.user.is_authenticated and comment_form %}
+          <article class="media">        
+            <figure class="media-left">
+            <p class="image is-48x48">
+              <img src={% static "announcement.png" %} >
+            </p>
+          </figure>
+          <div class="media-content box">
+            <form method="post">
+                <input type='hidden' name='type' value='comment'>
+                {% csrf_token %}
+                {{ comment_form  }}
+                <div class="field">
+                  <p class="control">
+                    <button class="button is-info is-light">
+                        <span class="icon">
+                          <i class="fas fa-paper-plane"></i>
+                        </span>
+                        <span>Отправить</span>
+                    </button>
+                  </p>
+                </div>
+            </form>
+          </div>
+        </article>
+         
+        {% endif %}
+      </div>
+    </article>    
+</div>
+
+
 {% endblock content %}

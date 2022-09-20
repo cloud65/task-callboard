@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView
 from django.contrib.auth.models import User
 from .models import *
-from .forms import NewUserForm
+from .forms import *
 from .email import *
 
 
@@ -17,7 +17,8 @@ def register_request(request):  # Регистрация и отправка к�
             return redirect(f"/register/email/{user.pk}")
     else:
         form = NewUserForm()
-    return render(request=request, template_name="registration/register.html", context={"form": form, 'data': request.POST})
+    return render(request=request, template_name="registration/register.html",
+                  context={"form": form, 'data': request.POST})
 
 
 def register_email_request(request, user_id):  # Проверка кода Email
@@ -45,39 +46,34 @@ class AnnouncementList(ListView):
     model = Announcement
     ordering = '-date_create'
     template_name = 'app/list.html'
-    context_object_name = 'posts'
+    context_object_name = 'data'
     paginate_by = 6
 
 
-class AnnouncementDetail(DetailView):
-    model = Announcement
-    template_name = 'app/post.html'
-    context_object_name = 'post'
+def announcement_detail(request, pk, action):
+    announcement = Announcement.objects.get(pk=pk) if pk!=0 else None
+    init_recall = {'announcement': pk, 'user': request.user}
+    recall_form = RecallFormModel(initial=init_recall) if not announcement is None else None
 
+    form = None
+    if action == 'edit' and request.user==announcement.user:
+        form = AnnouncementFormModel(instance=announcement)
+    elif action == 'add':
+        form = AnnouncementFormModel(initial={'user': request.user})
 
-class AnnouncementCreate(CreateView):
-    model = Announcement
+    if request.method == "POST" and request.user.is_authenticated:
+        if request.POST.get('type') == 'comment':
+            recall_form = RecallFormModel(request.POST)
+            if recall_form.is_valid():
+                recall_form.save()
+                recall_form = RecallFormModel(initial=init_recall)
+        elif request.POST.get('type') == 'post':
+            if action == 'add':
+                form = AnnouncementFormModel(request.POST)
+            else:
+                form = AnnouncementFormModel(request.POST, instance=announcement)
+            if form.is_valid():
+                form.save()
+                return redirect(f"/post/{form.instance.pk}/detail")
 
-
-class AnnouncementUpdate(UpdateView):
-    model = Announcement
-
-
-class AnnouncementDelete(DeleteView):
-    model = Announcement
-
-
-class RecallList(ListView):
-    model = Recall
-
-
-class RecallCreate(CreateView):
-    model = Recall
-
-
-class RecallUpdate(UpdateView):
-    model = Recall
-
-
-class RecallDelete(DeleteView):
-    model = Recall
+    return render(request, 'app/post.html', {'form': form, 'comment_form': recall_form, 'data': announcement})

@@ -26,10 +26,11 @@ class Announcement(models.Model):
 
 
 class Recall(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recalls')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recalls')    
     announcement = models.ForeignKey(Announcement, on_delete=models.CASCADE, related_name='recalls')
+    date_create = models.DateTimeField(auto_now_add=True)
     content = models.TextField()
     accept = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.text[:50]
+        return self.content[:50]

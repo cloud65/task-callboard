@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django_summernote.widgets import SummernoteWidget
+from .models import Recall, Announcement
 
 
 # Create your forms here.
@@ -18,3 +20,25 @@ class NewUserForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+
+class AnnouncementFormModel(forms.ModelForm):
+    class Meta:
+        model = Announcement
+        fields = ["title","content", "user"]
+        widgets = {
+            'user': forms.HiddenInput,
+            'title': forms.TextInput(attrs={'class': 'input'}),
+            'content': SummernoteWidget}
+        labels = {'content': 'Текст', 'title': 'Тема'}
+
+
+class RecallFormModel(forms.ModelForm):
+    class Meta:
+        model = Recall
+        fields = ["content", "announcement", "user"]
+        widgets = {
+            'user': forms.HiddenInput,
+            'announcement': forms.HiddenInput,
+            'content': SummernoteWidget}
+        labels = {'content': '', }
