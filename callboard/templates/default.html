@@ -16,6 +16,11 @@
       <img src={% static "announcement.png" %} height="80" style="padding-right: 1em;">
       Доска объявлений
     </a>
+    
+    <a class="navbar-item" href="/news">
+      <img src={% static "icons8-news-64.png" %} height="80" style="padding-right: 1em;">
+      Новости
+    </a>
 
     <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
       <span aria-hidden="true"></span>
@@ -30,15 +35,18 @@
             {{ request.user }}
           </a>
           <div class="navbar-dropdown">
-            <a class="navbar-item">
+            <a class="navbar-item" href="/post/0/add">
+              Добавить объявление
+            </a>            
+            <a class="navbar-item" href="/my">
               Мои объявления
             </a>
-            <a class="navbar-item">
+            <a class="navbar-item" href="/recall">
               Мои ответы
             </a>
-            <a class="navbar-item">
+            <!--<a class="navbar-item">
               Профиль
-            </a>
+            </a>-->
           </div>
         </div>
       {% endif %}

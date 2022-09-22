@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from django.contrib.auth.models import User
 from .models import *
 from .forms import *
@@ -44,21 +44,35 @@ def register_email_request_resend(request, user_id):  # Повторная от�
 
 class AnnouncementList(ListView):
     model = Announcement
-    ordering = '-date_create'
     template_name = 'app/list.html'
     context_object_name = 'data'
     paginate_by = 6
 
+    def get_queryset(self):
+        if self.request.path == '/my':
+            return Announcement.objects.filter(user=self.request.user).order_by('-date_create')
+        elif self.request.path == '/recall':
+            return Announcement.objects.filter(
+                pk__in=Recall.objects.filter(user=self.request.user).values('announcement')
+            ).order_by('-date_create')
+        elif self.request.path == '/recall-new':
+            return Announcement.objects.filter(
+                pk__in=Recall.objects.filter(user=self.request.user, is_view=False).values('announcement')
+            ).order_by('-date_create')
+        else:
+            return Announcement.objects.all().order_by('-date_create')
+
 
 def announcement_detail(request, pk, action):
-    announcement = Announcement.objects.get(pk=pk) if pk!=0 else None
+    prev_url = request.GET.get('prev', '/')
+    announcement = Announcement.objects.get(pk=pk) if pk != 0 else None
     init_recall = {'announcement': pk, 'user': request.user}
     recall_form = RecallFormModel(initial=init_recall) if not announcement is None else None
 
     form = None
-    if action == 'edit' and request.user==announcement.user:
+    if action == 'edit' and request.user == announcement.user:
         form = AnnouncementFormModel(instance=announcement)
-    elif action == 'add':
+    elif action == 'add' and request.user.is_authenticated:
         form = AnnouncementFormModel(initial={'user': request.user})
 
     if request.method == "POST" and request.user.is_authenticated:
@@ -74,6 +88,45 @@ def announcement_detail(request, pk, action):
                 form = AnnouncementFormModel(request.POST, instance=announcement)
             if form.is_valid():
                 form.save()
-                return redirect(f"/post/{form.instance.pk}/detail")
+                return redirect(f"/post/{form.instance.pk}/detail?prev={prev_url}")
+    elif request.method == "GET" and action == 'del' and request.user == announcement.user:
+        announcement.delete()
+        return redirect(request.GET.get('redirect', '/'))
 
-    return render(request, 'app/post.html', {'form': form, 'comment_form': recall_form, 'data': announcement})
+    editable = action == 'add' or request.user == announcement.user
+    context = {
+        'prev': prev_url if prev_url.find('/add') == -1 else '/',
+        'form': form,
+        'comment_form': recall_form,
+        'data': announcement,
+        'editable': editable,
+        'can_accept': announcement and request.user == announcement.user,
+    }
+    return render(request, 'app/post.html', context)
+
+
+def accept_comment(request, pk):
+    recall = Recall.objects.get(pk=pk)
+    if request.user == recall.announcement.user:
+        recall.accept = not recall.accept
+        recall.save()
+    return redirect(request.META.get('HTTP_REFERER'))
+
+
+class NewsList(ListView):
+    model = News
+    template_name = 'app/news.html'
+    context_object_name = 'data'
+    paginate_by = 6
+    ordering = ['-date_update']
+
+
+class NewsDetail(DetailView):
+    model = News
+    template_name = 'app/news.html'
+    context_object_name = 'data'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_detail'] = True
+        return context

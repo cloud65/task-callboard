@@ -137,10 +137,10 @@ LOGOUT_REDIRECT_URL = "/accounts/login/"
 # Настройка почты
 _env = dotenv_values(os.path.join(BASE_DIR, '.env'))
 EMAIL_HOST = 'smtp.cloud65.ru'
-EMAIL_PORT = 465
+EMAIL_PORT = 25
 EMAIL_HOST_USER = 'django@cloud65.ru'
 EMAIL_HOST_PASSWORD = _env.get('EMAIL_HOST_PASSWORD', '')
-EMAIL_USE_SSL = True
+EMAIL_USE_SSL = False
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 

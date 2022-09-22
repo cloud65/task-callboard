@@ -5,7 +5,12 @@
 
 
 <div class="box">
-    <h2 class="title is-3 ">{{ data.title }}</h2> 
+    <a class="button is-info is-light" href="{{prev}}">
+        <span class="icon">
+          <i class="fas fa-arrow-left"></i>
+        </span>
+        <span>К списку</span>
+    </a>    
     <article class="media">
       <figure class="media-left">
         <p class="image is-64x64">
@@ -18,17 +23,18 @@
             {% if form  %}
             <form method="post">
                 <input type='hidden' name='type' value='post'>
+                <input type='hidden' name='prev' value={{prev}}>
                 <input type='hidden' name='pk' value={{data.pk}}>
                 {% csrf_token %}
                 {{ form  }}
                 <div class="field">
                   <div class="buttons">
-                    <button class="button is-warning is-light">
+                    <a class="button is-warning is-light" href="/post/{{data.pk}}/detail?prev={{prev}}">
                         <span class="icon">
-                          <i class="fas fa-cancel"></i>
+                          <i class="fas fa-ban"></i>
                         </span>
                         <span>Отмена</span>
-                    </button>
+                    </a>
                     <button class="button is-info">
                         <span class="icon">
                           <i class="fas fa-save"></i>
@@ -36,18 +42,43 @@
                         <span>Сохранить</span>
                     </button>
 
-                      /post/{pk}/detail
+                      
                   </div>
                 </div>
             </form>
             {% else  %}
-              <strong>{{data.user}}</strong>
+              <h2 class="title is-3 ">{{ data.title }}</h2> 
+              <strong class="has-text-info">{{data.user}}</strong>
               <div class="box">
               {{ data.content|safe }}
               </div>
-              <span class="tag is-primary is-light" title='Дата создания'>{{data.date_create}}</span>
-              {% if data.date_update %}<span class="tag is-link is-light" title='Дата изменения'>{{data.date_update}}</span> {% endif %}
+              <article class="media">
+              <div class="media-left">
+                <span class="tag is-primary is-light" title='Дата создания'>{{data.date_create|date:'d.m.Y H:m'}}</span>
+                {% if data.date_update %}<span class="tag is-link is-light" title='Дата изменения'>{{data.date_update|date:'d.m.Y H:m'}}</span> {% endif %}
+              </div>
+              <div class="media-right">
+                 {% if editable %}
+                    <div class="buttons" style="margin: 0">              
+                        <a class="button is-small is-success is-light" href="/post/{{data.pk}}/edit?prev={{prev}}">
+                            <span class="icon">
+                              <i class="fas fa-edit"></i>
+                            </span>
+                            <span>Изменить</span>
+                        </a>
+                        <a class="button is-small is-danger is-light" href="#"
+                            onClick='document.getElementById("win-modal").setAttribute("class", "modal is-active");'
+                            >
+                            <span class="icon">
+                              <i class="fas fa-trash"></i>
+                            </span>
+                            <span>Удалить</span>
+                        </a>
+                    </div>
+                 {% endif %}
+              </div>
             {% endif  %}
+            <article>
           </div>
         </div>
 
@@ -61,12 +92,21 @@
           <div class="media-content">
             <div class="content box">
               <p>
-                <strong>{{comment.user}}</strong> 
-                {% if comment.accept %} <span class="tag is-link">Принято</span>{% endif %}
+                <strong>{{comment.user}}</strong>
+                {% if comment.accept %} <span class="tag is-small is-link">Принято</span>{% endif %}
+                {% if can_accept and request.user != comment.user %}
+                    <a class="button is-small is-info {{ comment.accept|yesno:'_,is-light,is-light' }}" href="/comment/{{comment.pk}}">
+                        <span class="icon">
+                          <i class="fas fa-check"></i>
+                        </span>
+                        <span>{{ comment.accept|yesno:"Отказаться,Принять,Принять" }}</span>
+                    </a>
+                {% endif %}
+                
                 <br>
                 {{ comment.content|safe }}
                 <br>
-                <span class="tag is-primary is-light" title='Дата создания'>{{comment.date_create}}</span>
+                <span class="tag is-primary is-light" title='Дата создания'>{{comment.date_create|date:'d.m.Y H:m'}}</span>
               </p>
             </div>
           </div>
@@ -102,6 +142,24 @@
         {% endif %}
       </div>
     </article>    
+</div>
+
+
+<div class="modal" id='win-modal'>
+  <div class="modal-background"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Удаление</p>
+      <button class="delete" aria-label="close" onClick='document.getElementById("win-modal").setAttribute("class", "modal");'></button>
+    </header>
+    <section class="modal-card-body">
+      Удалить объявление <strong>{{data.title}}</strong>
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-danger" onClick='window.location.assign("/post/{{data.pk}}/del?redirect={{prev}}")'>Удалить</button>
+      <button class="button" onClick='document.getElementById("win-modal").setAttribute("class", "modal");'>Отмена</button>
+    </footer>
+  </div>
 </div>
 
 

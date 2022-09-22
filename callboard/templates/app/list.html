@@ -1,13 +1,18 @@
 {% extends 'default.html' %}
 {% load static %}
+{% load custom_template_tags %}
 
 {% block content %}
 {% for post in data %}
-  <div class="box" style="cursor: pointer" onclick='window.location.assign("post/{{ post.pk }}/detail")'>
+  <div class="box" style="cursor: pointer" onclick='window.location.assign("post/{{ post.pk }}/detail?prev={{ request.get_full_path }}")'>
   <article class="media">
     <div class="media-left">
       <figure class="image is-64x64">
-        <img src={% static "announcement.png" %} alt="Image">
+        {% if post.content|parse_image %}
+            <img src={{post.content|parse_image|safe}} alt="Image">
+        {% else %}
+            <img src={% static "announcement.png" %} alt="Image">
+        {% endif %}
       </figure>      
     </div>
     <div class="media-content">    
@@ -19,12 +24,18 @@
           {{ post.content|striptags|truncatewords:20}}
         </p>
       </div>
+      <span class="icon-text has-text-success">
+          <span class="icon">
+            <i class="fas fa-list"></i>
+          </span>
+          <span>{{post.category}}</span>
+      </span>
       <span class="icon-text has-text-info">
           <span class="icon">
             <i class="fas fa-comment"></i>
           </span>
           <span>{{post.recalls.count}}</span>
-        </span>
+      </span>
     </div>
     <div class="media-right">
       <span class="icon is-small">

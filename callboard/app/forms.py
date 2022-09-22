@@ -25,12 +25,13 @@ class NewUserForm(UserCreationForm):
 class AnnouncementFormModel(forms.ModelForm):
     class Meta:
         model = Announcement
-        fields = ["title","content", "user"]
+        fields = ["title", "category", "content", "user"]
         widgets = {
             'user': forms.HiddenInput,
             'title': forms.TextInput(attrs={'class': 'input'}),
+            'category': forms.Select(attrs={'class': 'input'}),
             'content': SummernoteWidget}
-        labels = {'content': 'Текст', 'title': 'Тема'}
+        labels = {'content': 'Текст', 'title': 'Тема', 'category': "Категория"}
 
 
 class RecallFormModel(forms.ModelForm):

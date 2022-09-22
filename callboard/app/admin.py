@@ -13,9 +13,13 @@ class AnnouncementAdmin(SummernoteModelAdmin):
 
 class RecallAdmin(SummernoteModelAdmin):
     summernote_fields = ('content',)
+    
+class NewsAdmin(SummernoteModelAdmin):
+    summernote_fields = ('content',)
 
 
 admin.site.register(Announcement, AnnouncementAdmin)
 admin.site.register(Recall, RecallAdmin)
+admin.site.register(News, NewsAdmin)
 admin.site.register(Category)
 

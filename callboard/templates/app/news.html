@@ -1,0 +1,67 @@
+{% extends 'default.html' %}
+{% load static %}
+{% load custom_template_tags %}
+
+{% block content %}
+{% if is_detail %}
+    <div class="box">
+        <h2 class="title is-3 ">{{ data.title }}</h2>
+        <div class="content">
+            {{ data.content|safe }}
+        </div>
+    </div>
+{% else %}
+    {% for news in data %}
+      <div class="box" style="cursor: pointer" onclick='window.location.assign("news/{{ news.pk }}?prev={{ request.get_full_path }}")'>
+      <article class="media">
+        <div class="media-left">
+          <figure class="image is-64x64">
+            {% if news.content|parse_image %}
+                <img src={{news.content|parse_image|safe}} alt="Image">
+            {% else %}
+                <img src={% static "icons8-news-64.png" %} alt="Image">
+            {% endif %}            
+          </figure>      
+        </div>
+        <div class="media-content">    
+          <div class="content">
+            <p>
+              <small class="has-text-info">{{ news.date_update|date:'d.m.Y' }}</small>
+              <strong>{{ news.title|truncatewords:20}}</strong>
+              <br>
+              {{ news.content|striptags|truncatewords:20}}
+            </p>
+          </div>      
+      </article>
+    </div>
+    {% endfor %}
+
+    <nav class="pagination is-fixed-bottom is-centered" role="navigation" aria-label="pagination">
+      <!--<a class="pagination-previous">Previous</a>
+      <a class="pagination-next">Next page</a>-->
+      <ul class="pagination-list">
+        {% if page_obj.has_previous %}
+            <li><a class="pagination-link" aria-label="Goto page 1" href="?page=1">1</a></li>
+            {% if page_obj.previous_page_number != 1 %}
+                <li><span class="pagination-ellipsis">&hellip;</span></li>
+                <li><a class="pagination-link" aria-label="Goto page 45" href="?page={{ page_obj.previous_page_number }}">
+                      {{ page_obj.previous_page_number }}
+                </a></li>
+            {% endif %}
+        {% endif %}
+        <li><a class="pagination-link is-current" aria-label="Page 46" aria-current="page">{{ page_obj.number }}</a></li>
+        {% if page_obj.has_next %}
+           <li><a class="pagination-link" aria-label="Goto page 47" href="?page={{ page_obj.next_page_number }}">
+               {{ page_obj.next_page_number }}
+           </a></li>
+           {% if paginator.num_pages != page_obj.next_page_number %}
+               <li><span class="pagination-ellipsis">&hellip;</span></li>
+               <li><a class="pagination-link" aria-label="Goto page 86" href="?page={{ page_obj.paginator.num_pages }}">
+                    {{ page_obj.paginator.num_pages }}
+               </a></li>
+           {% endif %}
+       {% endif %}
+      </ul>
+    </nav>
+{% endif %}
+{% endblock content %}

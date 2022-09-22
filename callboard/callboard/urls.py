@@ -39,5 +39,11 @@ if settings.DEBUG:
 
 urlpatterns += [
     path('', AnnouncementList.as_view(), name='main_page'),
+    path('my', AnnouncementList.as_view(), name='my_page'),
+    path('recall', AnnouncementList.as_view(), name='recall_page'),
+    path('recall-new', AnnouncementList.as_view(), name='recall_new_page'),
     path('post/<int:pk>/<str:action>', announcement_detail, name='detail_post'),
+    path('comment/<int:pk>', accept_comment, name='accept_comment'),
+    path('news', NewsList.as_view(), name='news_list'),
+    path('news/<int:pk>', NewsDetail.as_view(), name='news_deatil'),
 ]
