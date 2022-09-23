@@ -9,7 +9,7 @@
     <div class="media-left">
       <figure class="image is-64x64">
         {% if post.content|parse_image %}
-            <img src={{post.content|parse_image|safe}} alt="Image">
+            <img style="max-height: 5em;"  src={{post.content|parse_image|safe}} alt="Image">
         {% else %}
             <img src={% static "announcement.png" %} alt="Image">
         {% endif %}

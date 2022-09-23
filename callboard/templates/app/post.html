@@ -14,7 +14,7 @@
     <article class="media">
       <figure class="media-left">
         <p class="image is-64x64">
-          <img src={% static "announcement.png" %}>
+          <img src={% static "announcement.png" %}     >
         </p>
       </figure>
       <div class="media-content">
@@ -29,7 +29,9 @@
                 {{ form  }}
                 <div class="field">
                   <div class="buttons">
-                    <a class="button is-warning is-light" href="/post/{{data.pk}}/detail?prev={{prev}}">
+                    <a class="button is-warning is-light"
+                       href={% if data.pk %} "/post/{{data.pk}}/detail?prev={{prev}}" {% else %} "{{prev}}" {% endif %}
+                    >
                         <span class="icon">
                           <i class="fas fa-ban"></i>
                         </span>
@@ -94,6 +96,8 @@
               <p>
                 <strong>{{comment.user}}</strong>
                 {% if comment.accept %} <span class="tag is-small is-link">Принято</span>{% endif %}
+                {% if request.user == data.user and comment.pk in not_views %} <span class="tag is-small is-warning">Новое</span>{% endif %}
+                {% if request.user == comment.user and not comment.pk in not_views %} <span class="tag is-small is-warning">Просмотрено</span>{% endif %}
                 {% if can_accept and request.user != comment.user %}
                     <a class="button is-small is-info {{ comment.accept|yesno:'_,is-light,is-light' }}" href="/comment/{{comment.pk}}">
                         <span class="icon">
@@ -102,7 +106,6 @@
                         <span>{{ comment.accept|yesno:"Отказаться,Принять,Принять" }}</span>
                     </a>
                 {% endif %}
-                
                 <br>
                 {{ comment.content|safe }}
                 <br>

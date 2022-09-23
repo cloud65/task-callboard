@@ -57,7 +57,8 @@ class AnnouncementList(ListView):
             ).order_by('-date_create')
         elif self.request.path == '/recall-new':
             return Announcement.objects.filter(
-                pk__in=Recall.objects.filter(user=self.request.user, is_view=False).values('announcement')
+                user=self.request.user,
+                pk__in=Recall.objects.filter(is_view=False).values('announcement')
             ).order_by('-date_create')
         else:
             return Announcement.objects.all().order_by('-date_create')
@@ -92,16 +93,21 @@ def announcement_detail(request, pk, action):
     elif request.method == "GET" and action == 'del' and request.user == announcement.user:
         announcement.delete()
         return redirect(request.GET.get('redirect', '/'))
-
+    reacll_not_views = [_p['pk'] for _p in announcement.recalls.filter(is_view=False).values('pk')] if announcement else []
     editable = action == 'add' or request.user == announcement.user
     context = {
         'prev': prev_url if prev_url.find('/add') == -1 else '/',
         'form': form,
         'comment_form': recall_form,
         'data': announcement,
+        'not_views': reacll_not_views,
         'editable': editable,
         'can_accept': announcement and request.user == announcement.user,
     }
+    print(reacll_not_views)
+    # Переключим статус в просмотренные
+    if request.method == "GET" and announcement and request.user == announcement.user:
+        announcement.recalls.filter(is_view=False).update(is_view=True)
     return render(request, 'app/post.html', context)
 
 
